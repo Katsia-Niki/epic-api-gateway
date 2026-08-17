@@ -32,8 +32,6 @@ public class GatewayProperties {
     public static class Jwt {
         @NotBlank
         private String secret;
-        @NotBlank
-        private String issuer;
     }
 
     @Getter
@@ -50,5 +48,7 @@ public class GatewayProperties {
         private String authUri;
         @NotBlank
         private String userUri;
+        @NotBlank
+        private String internalKey;
     }
 }
