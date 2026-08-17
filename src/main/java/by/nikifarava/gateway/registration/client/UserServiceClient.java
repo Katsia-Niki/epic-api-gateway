@@ -2,7 +2,6 @@ package by.nikifarava.gateway.registration.client;
 
 import by.nikifarava.gateway.registration.dto.request.UserProfileRequest;
 import by.nikifarava.gateway.registration.dto.response.UserResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,6 @@ package by.nikifarava.gateway.registration.client;
 
 import by.nikifarava.gateway.registration.dto.request.CredentialsRequest;
 import by.nikifarava.gateway.registration.dto.response.JwtResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -25,13 +24,5 @@ public class AuthServiceClient {
                 .bodyValue(credentialsRequest)
                 .retrieve()
                 .bodyToMono(JwtResponse.class);
-    }
-
-    public Mono<Void> deleteCredentials(Long userId) {
-        return authWebClient.delete()
-                .uri("/api/auth/credentials/{userId}", userId)
-                .retrieve()
-                .toBodilessEntity()
-                .then();
     }
 }
