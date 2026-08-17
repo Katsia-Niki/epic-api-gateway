@@ -1,7 +1,6 @@
 package by.nikifarava.gateway.security;
 
 import by.nikifarava.gateway.config.GatewayProperties;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -19,17 +18,13 @@ public class JwtService {
                 properties.getJwt().getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
-    public Claims parse(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
     public boolean isValid(String token) {
         try {
-            parse(token);
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;

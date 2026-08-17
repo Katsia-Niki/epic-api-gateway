@@ -7,7 +7,6 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -24,32 +23,25 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-       String path = exchange.getRequest().getURI().getPath();
+        String path = exchange.getRequest().getURI().getPath();
 
-       if(gatewayProperties.getSecurity().getPublicPaths().contains(path)){
-           return chain.filter(exchange);
-       }
+        if (gatewayProperties.getSecurity().getPublicPaths().contains(path)) {
+            return chain.filter(exchange);
+        }
 
-       String header = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        String header = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-       if(header==null || !header.startsWith("Bearer ")){
-           return unauthorized(exchange);
-       }
+        if (header == null || !header.startsWith("Bearer ")) {
+            return unauthorized(exchange);
+        }
 
-       String token = header.substring(BEGIN_INDEX);
+        String token = header.substring(BEGIN_INDEX);
 
-       if(!jwtService.isValid(token)){
-           return unauthorized(exchange);
-       }
+        if (!jwtService.isValid(token)) {
+            return unauthorized(exchange);
+        }
 
-       var claims = jwtService.parse(token);
-
-       ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-               .header("X-User-Id", String.valueOf(claims.get("userId", Long.class)))
-               .header("X-User-Role", claims.get("role", String.class))
-               .build();
-
-       return chain.filter(exchange.mutate().request(mutatedRequest).build());
+        return chain.filter(exchange);
     }
 
     private  Mono<Void> unauthorized(ServerWebExchange exchange) {
