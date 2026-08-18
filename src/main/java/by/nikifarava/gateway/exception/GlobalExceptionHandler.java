@@ -56,13 +56,7 @@ public class GlobalExceptionHandler {
 
         HttpStatus httpStatus = HttpStatus.resolve(status);
 
-        if (httpStatus == null) {
-            httpStatus = HttpStatus.BAD_GATEWAY;
-            status = httpStatus.value();
-            message = "Downstream service error";
-        }
-
-        if (status >= 500) {
+        if (httpStatus == null || status >= 500) {
             httpStatus = HttpStatus.BAD_GATEWAY;
             status = httpStatus.value();
             message = "Downstream service error";
