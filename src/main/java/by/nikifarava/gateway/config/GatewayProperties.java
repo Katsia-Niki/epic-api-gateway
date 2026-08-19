@@ -23,9 +23,6 @@ public class GatewayProperties {
     @Valid
     @NotNull
     private Security security = new Security();
-    @Valid
-    @NotNull
-    private Services services = new Services();
 
     @Getter
     @Setter
@@ -39,16 +36,5 @@ public class GatewayProperties {
     public static class Security {
         @NotEmpty
         private List<String> publicPaths = new ArrayList<>();
-    }
-
-    @Getter
-    @Setter
-    public static class Services {
-        @NotBlank
-        private String authUri;
-        @NotBlank
-        private String userUri;
-        @NotBlank
-        private String internalKey;
     }
 }
