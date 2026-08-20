@@ -1,5 +1,6 @@
 package by.nikifarava.gateway.security;
 
+import by.nikifarava.gateway.client.AuthServiceClient;
 import by.nikifarava.gateway.config.GatewayProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -19,7 +20,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final int BEGIN_INDEX = 7;
 
     private final GatewayProperties gatewayProperties;
-    private final JwtService jwtService;
+    private final AuthServiceClient authServiceClient;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -37,11 +38,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = header.substring(BEGIN_INDEX);
 
-        if (!jwtService.isValid(token)) {
-            return unauthorized(exchange);
-        }
-
-        return chain.filter(exchange);
+        return authServiceClient.validate(token)
+                .then(Mono.defer(() -> chain.filter(exchange)))
+                .onErrorResume(ex -> unauthorized(exchange));
     }
 
     private  Mono<Void> unauthorized(ServerWebExchange exchange) {

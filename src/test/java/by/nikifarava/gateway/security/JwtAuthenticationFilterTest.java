@@ -1,6 +1,7 @@
 package by.nikifarava.gateway.security;
 
 
+import by.nikifarava.gateway.client.AuthServiceClient;
 import by.nikifarava.gateway.config.GatewayProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +21,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
@@ -28,7 +32,7 @@ class JwtAuthenticationFilterTest {
     private static final String JWT_TOKEN = "test-token";
 
     @Mock
-    private JwtService jwtService;
+    private AuthServiceClient authServiceClient;
 
     @Mock
     private GatewayFilterChain filterChain;
@@ -43,7 +47,7 @@ class JwtAuthenticationFilterTest {
                 "/api/auth/refresh",
                 "/api/auth/validate"));
 
-        jwtFilter = new JwtAuthenticationFilter(gatewayProperties, jwtService);
+        jwtFilter = new JwtAuthenticationFilter(gatewayProperties, authServiceClient);
     }
 
     @Test
@@ -54,8 +58,10 @@ class JwtAuthenticationFilterTest {
 
 
         StepVerifier.create(jwtFilter.filter(exchange, filterChain)).verifyComplete();
-        verify(jwtService, never()).isValid(any());
+
+        verify(authServiceClient, never()).validate(anyString());
         verify(filterChain).filter(exchange);
+
         assertNull(exchange.getResponse().getStatusCode());
     }
 
@@ -68,6 +74,7 @@ class JwtAuthenticationFilterTest {
 
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
 
+        verify(authServiceClient, never()).validate(anyString());
         verify(filterChain, never()).filter(any());
     }
 
@@ -83,6 +90,7 @@ class JwtAuthenticationFilterTest {
 
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
 
+        verify(authServiceClient, never()).validate(anyString());
         verify(filterChain, never()).filter(any());
     }
 
@@ -94,7 +102,7 @@ class JwtAuthenticationFilterTest {
                         .header("Authorization", "Bearer bad-token")
                         .build());
 
-        when(jwtService.isValid("bad-token")).thenReturn(false);
+        when(authServiceClient.validate("bad-token")).thenReturn(Mono.error(new RuntimeException()));
 
         StepVerifier.create(jwtFilter.filter(exchange, filterChain)).verifyComplete();
 
@@ -111,12 +119,12 @@ class JwtAuthenticationFilterTest {
                         .header("Authorization", "Bearer " + JWT_TOKEN)
                         .build());
 
-        when(jwtService.isValid(JWT_TOKEN)).thenReturn(true);
+        when(authServiceClient.validate(JWT_TOKEN)).thenReturn(Mono.empty());
         when(filterChain.filter(exchange)).thenReturn(Mono.empty());
 
         StepVerifier.create(jwtFilter.filter(exchange, filterChain)).verifyComplete();
 
-        verify(jwtService).isValid(JWT_TOKEN);
+        verify(authServiceClient).validate(JWT_TOKEN);
         verify(filterChain).filter(exchange);
 
         assertNull(exchange.getResponse().getStatusCode());

@@ -19,16 +19,16 @@ import java.util.List;
 public class GatewayProperties {
     @Valid
     @NotNull
-    private Jwt jwt = new Jwt();
+    private Services services = new Services();
     @Valid
     @NotNull
     private Security security = new Security();
 
     @Getter
     @Setter
-    public static class Jwt {
+    public static class Services {
         @NotBlank
-        private String secret;
+        private String authUri;
     }
 
     @Getter
