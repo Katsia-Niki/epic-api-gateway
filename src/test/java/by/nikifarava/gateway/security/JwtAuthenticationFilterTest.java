@@ -45,7 +45,9 @@ class JwtAuthenticationFilterTest {
         gatewayProperties.getSecurity().setPublicPaths(List.of("/api/auth/login",
                 "/api/auth/register",
                 "/api/auth/refresh",
-                "/api/auth/validate"));
+                "/api/auth/validate",
+                "/actuator/health",
+                "/actuator/info"));
 
         jwtFilter = new JwtAuthenticationFilter(gatewayProperties, authServiceClient);
     }
@@ -61,7 +63,6 @@ class JwtAuthenticationFilterTest {
 
         verify(authServiceClient, never()).validate(anyString());
         verify(filterChain).filter(exchange);
-
         assertNull(exchange.getResponse().getStatusCode());
     }
 

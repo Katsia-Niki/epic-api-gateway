@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final int BEGIN_INDEX = 7;
+    private static final String ACTUATOR_PATH_PREFIX = "/actuator";
 
     private final GatewayProperties gatewayProperties;
     private final AuthServiceClient authServiceClient;
@@ -26,7 +27,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        if (gatewayProperties.getSecurity().getPublicPaths().contains(path)) {
+        if (gatewayProperties.getSecurity().getPublicPaths().contains(path)
+                || path.startsWith(ACTUATOR_PATH_PREFIX)) {
             return chain.filter(exchange);
         }
 
@@ -50,6 +52,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -100;
+        return -1;
     }
 }
